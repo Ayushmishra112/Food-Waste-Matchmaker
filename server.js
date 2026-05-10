@@ -45,7 +45,7 @@ app.post('/api/analyze-food', upload.single('image'), async (req, res) => {
               {
                 "description": "string (A short description of the food)",
                 "quantity": integer (Number of items or estimated servings, just the number),
-                "unit": "string (The unit for the quantity, e.g., 'servings', 'burgers', 'kgs')",
+                "unit": "string (MUST be one of: 'kgs', 'lbs', or 'servings')",
                 "dietType": "string ('veg' or 'non-veg')",
                 "type": "string ('raw' or 'cooked')"
               }`

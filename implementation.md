@@ -25,7 +25,7 @@ The AI is instructed to return a strictly formatted JSON object with the followi
 | :--- | :--- | :--- |
 | `description` | `string` | A short visual description of the food. |
 | `quantity` | `integer` | The numerical count or estimate of items/servings. |
-| `unit` | `string` | The measurement unit (e.g., 'burgers', 'servings'). |
+| `unit` | `string` | MUST be one of: `"kgs"`, `"lbs"`, or `"servings"`. |
 | `dietType` | `string` | Fixed values: `"veg"` or `"non-veg"`. |
 | `type` | `string` | Fixed values: `"raw"` or `"cooked"`. |
 
