@@ -1,122 +1,204 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Toaster, toast } from 'sonner';
+import Logo from './components/Logo';
+import UploadView from './components/UploadView';
+import FormView from './components/FormView';
+import ResultsView from './components/ResultsView';
+import { ngoData, computeMatches } from './data/ngos';
 
-function App() {
-  const [count, setCount] = useState(0)
+// View state machine
+const VIEWS = { UPLOAD: 'upload', FORM: 'form', RESULTS: 'results' };
+
+// Page transition variants
+const pageVariants = {
+  initial: (dir) => ({ opacity: 0, x: dir > 0 ? 60 : -60 }),
+  animate: { opacity: 1, x: 0 },
+  exit: (dir) => ({ opacity: 0, x: dir > 0 ? -60 : 60 }),
+};
+
+const pageTransition = { duration: 0.38, ease: [0.4, 0, 0.2, 1] };
+
+export default function App() {
+  const [view, setView] = useState(VIEWS.UPLOAD);
+  const [direction, setDirection] = useState(1);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [formData, setFormData] = useState(null);
+  const [matchedNgos, setMatchedNgos] = useState([]);
+
+  const navigateTo = (nextView, dir = 1) => {
+    setDirection(dir);
+    setView(nextView);
+  };
+
+  // Upload → Form
+  const handleUpload = (preview) => {
+    setImagePreview(preview);
+    toast.success('Photo analysed successfully!', {
+      description: 'Now tell us a bit about the food.',
+      icon: '📸',
+    });
+    navigateTo(VIEWS.FORM, 1);
+  };
+
+  // Form → Results
+  const handleFormSubmit = (data) => {
+    setFormData(data);
+    const matches = computeMatches(data, ngoData);
+    setMatchedNgos(matches);
+    navigateTo(VIEWS.RESULTS, 1);
+  };
+
+  // Any → Upload (reset)
+  const handleReset = () => {
+    setImagePreview(null);
+    setFormData(null);
+    setMatchedNgos([]);
+    navigateTo(VIEWS.UPLOAD, -1);
+  };
+
+  // Back: Results → Form, Form → Upload
+  const handleBack = () => {
+    if (view === VIEWS.FORM) navigateTo(VIEWS.UPLOAD, -1);
+    if (view === VIEWS.RESULTS) navigateTo(VIEWS.FORM, -1);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div
+      className="relative min-h-screen w-full overflow-hidden"
+      style={{ background: 'var(--bg-app)' }}
+    >
+      {/* Ambient blobs */}
+      <div
+        className="pointer-events-none absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-20"
+        style={{ background: 'radial-gradient(circle, #6ee7b7, transparent 70%)' }}
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute -bottom-40 -left-40 w-96 h-96 rounded-full opacity-15"
+        style={{ background: 'radial-gradient(circle, #99f6e4, transparent 70%)' }}
+        aria-hidden="true"
+      />
 
-      <div className="ticks"></div>
+      {/* Sticky Nav */}
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4"
+        style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(229,231,235,0.6)' }}
+      >
+        <Logo size={30} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        {/* Step indicator */}
+        <div className="flex items-center gap-2" aria-label="Progress steps">
+          {[
+            { key: VIEWS.UPLOAD, label: 'Upload' },
+            { key: VIEWS.FORM, label: 'Details' },
+            { key: VIEWS.RESULTS, label: 'Results' },
+          ].map((step, i) => {
+            const stepIndex = Object.values(VIEWS).indexOf(step.key);
+            const currentIndex = Object.values(VIEWS).indexOf(view);
+            const done = currentIndex > stepIndex;
+            const active = currentIndex === stepIndex;
+            return (
+              <div key={step.key} className="flex items-center gap-2">
+                {i > 0 && (
+                  <div
+                    className="w-8 h-px"
+                    style={{ background: done ? 'var(--brand-gradient)' : '#e5e7eb' }}
+                  />
+                )}
+                <div
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    active
+                      ? 'text-white shadow-sm'
+                      : done
+                      ? 'text-emerald-700 bg-emerald-50 border border-emerald-200'
+                      : 'text-slate-400 bg-slate-50 border border-slate-200'
+                  }`}
+                  style={active ? { background: 'var(--brand-gradient)' } : {}}
+                >
+                  {done ? (
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                      <path d="M2 5L4 7L8 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <span>{i + 1}</span>
+                  )}
+                  {step.label}
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <div className="w-24" /> {/* spacer to center steps */}
+      </nav>
+
+      {/* Main content with animated view transitions */}
+      <main className="pt-20">
+        <AnimatePresence mode="wait" custom={direction}>
+          {view === VIEWS.UPLOAD && (
+            <motion.div
+              key="upload"
+              custom={direction}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+            >
+              <UploadView onUpload={handleUpload} />
+            </motion.div>
+          )}
+
+          {view === VIEWS.FORM && (
+            <motion.div
+              key="form"
+              custom={direction}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+            >
+              <FormView
+                imagePreview={imagePreview}
+                onBack={handleBack}
+                onSubmit={handleFormSubmit}
+              />
+            </motion.div>
+          )}
+
+          {view === VIEWS.RESULTS && (
+            <motion.div
+              key="results"
+              custom={direction}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+            >
+              <ResultsView
+                matchedNgos={matchedNgos}
+                formData={formData}
+                onReset={handleReset}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* Toast provider */}
+      <Toaster
+        position="top-right"
+        richColors
+        toastOptions={{
+          style: {
+            borderRadius: '14px',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '14px',
+          },
+        }}
+      />
+    </div>
+  );
 }
-
-export default App
