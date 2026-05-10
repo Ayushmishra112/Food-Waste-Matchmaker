@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, ArrowRight, Thermometer, Package, Leaf, Drumstick, ChefHat, Sprout, Clock, Info } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Thermometer, Package, Leaf, Drumstick, ChefHat, Sprout, Clock, Info, Sparkles } from 'lucide-react';
 
 const FOOD_TYPES = [
   { id: 'veg', label: 'Vegetarian', icon: Leaf, color: 'emerald', emoji: '🥗' },
@@ -51,11 +51,11 @@ function OptionCard({ selected, onClick, children, id }) {
   );
 }
 
-export default function FormView({ imagePreview, onBack, onSubmit }) {
-  const [foodType, setFoodType] = useState('');
-  const [foodState, setFoodState] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [hoursSinceCooked, setHoursSinceCooked] = useState(2);
+export default function FormView({ imagePreview, initialData, onBack, onSubmit }) {
+  const [foodType, setFoodType] = useState(initialData?.foodType || '');
+  const [foodState, setFoodState] = useState(initialData?.foodState || '');
+  const [quantity, setQuantity] = useState(initialData?.quantity || '');
+  const [hoursSinceCooked, setHoursSinceCooked] = useState(initialData?.hoursSinceCooked || 2);
 
   const isValid = foodType && foodState && quantity;
 
@@ -96,7 +96,14 @@ export default function FormView({ imagePreview, onBack, onSubmit }) {
             )}
             <div>
               <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Tell us about<br /><span className="gradient-text">your food</span></h1>
-              <p className="text-slate-400 text-sm mt-1">Help us find the perfect NGO match</p>
+              {initialData?.description ? (
+                <p className="text-emerald-600 text-sm mt-2 font-medium bg-emerald-50 px-3 py-1.5 rounded-lg inline-block border border-emerald-100">
+                  <Sparkles size={14} className="inline mr-1.5 -mt-0.5" />
+                  AI saw: "{initialData.description}"
+                </p>
+              ) : (
+                <p className="text-slate-400 text-sm mt-1">Help us find the perfect NGO match</p>
+              )}
             </div>
           </div>
         </motion.div>

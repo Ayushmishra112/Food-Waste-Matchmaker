@@ -25,34 +25,168 @@ export default function App() {
   const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState(null);
   const [matchedNgos, setMatchedNgos] = useState([]);
+  
+  const [location, setLocation] = useState(null);
+  const [aiData, setAiData] = useState(null);
 
   const navigateTo = (nextView, dir = 1) => {
     setDirection(dir);
     setView(nextView);
   };
 
-  // Upload → Form
-  const handleUpload = (preview) => {
-    setImagePreview(preview);
-    toast.success('Photo analysed successfully!', {
-      description: 'Now tell us a bit about the food.',
-      icon: '📸',
+  // Helper to get location
+  const getLocation = async () => {
+    if (location) return location;
+    return new Promise((resolve) => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            setLocation(loc);
+            resolve(loc);
+          },
+          () => resolve({ lat: 19.0760, lng: 72.8777 }) // fallback to Mumbai
+        );
+      } else {
+        resolve({ lat: 19.0760, lng: 72.8777 });
+      }
     });
-    navigateTo(VIEWS.FORM, 1);
   };
 
-  // Form → Results
-  const handleFormSubmit = (data) => {
+  // Upload → Form (Calls /api/analyze-food)
+  const handleUpload = async ({ preview, file }) => {
+    setImagePreview(preview);
+    const loadingToast = toast.loading('Analyzing food & finding NGOs...', {
+      description: 'Our AI is processing the image.'
+    });
+
+    try {
+      const loc = await getLocation();
+      
+      const formDataToSend = new FormData();
+      formDataToSend.append('image', file);
+      formDataToSend.append('lat', loc.lat.toString());
+      formDataToSend.append('lng', loc.lng.toString());
+
+      const response = await fetch('http://localhost:3001/api/analyze-food', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      if (!response.ok) throw new Error('Failed to analyze image');
+
+      const data = await response.json();
+      
+      // Map Groq output to FormView state
+      let mappedQuantity = 'medium';
+      if (data.analysis.quantity < 5) mappedQuantity = 'small';
+      else if (data.analysis.quantity > 50) mappedQuantity = 'bulk';
+      else if (data.analysis.quantity > 20) mappedQuantity = 'large';
+
+      setAiData({
+        foodType: data.analysis.dietType === 'veg' ? 'veg' : 'non-veg',
+        foodState: data.analysis.type === 'cooked' ? 'cooked' : 'raw',
+        quantity: mappedQuantity,
+        description: data.analysis.description,
+        hoursSinceCooked: 2
+      });
+
+      // We could use the matches directly, but let's just go to form for verification
+      toast.dismiss(loadingToast);
+      toast.success('Analysis complete!', {
+        description: 'Review the details before confirming.',
+        icon: '✅',
+      });
+      
+      navigateTo(VIEWS.FORM, 1);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error('Analysis failed', {
+        description: error.message || 'Could not connect to AI engine.'
+      });
+      // Fallback: still go to form but empty
+      setAiData(null);
+      navigateTo(VIEWS.FORM, 1);
+    }
+  };
+
+  const mapBackendNgoToFrontend = (ngo, index) => {
+    // Map backend NGO format to frontend ResultsView format
+    return {
+      id: index + 1,
+      name: ngo.name,
+      matchScore: Math.min(Math.round(ngo.score), 99),
+      rating: (4 + Math.random()).toFixed(1), // Mock rating
+      distanceLabel: `${ngo.distance} km away`,
+      distance: parseFloat(ngo.distance),
+      totalDonations: Math.floor(Math.random() * 2000) + 500, // Mock
+      refrigeration: ngo.type === 'perishable' || ngo.type === 'any',
+      tags: [ngo.open24h ? "24/7 Open" : "Standard Hours", "Verified NGO", ngo.type === 'perishable' ? "Cold Storage" : "Dry Storage"],
+      tagColors: {
+        "24/7 Open": "green",
+        "Standard Hours": "blue",
+        "Verified NGO": "indigo",
+        "Cold Storage": "purple",
+        "Dry Storage": "orange"
+      },
+      operatingHours: ngo.open24h ? "24 Hours" : "9 AM – 8 PM",
+      currentNeed: ngo.needLevel >= 8 ? "High" : ngo.needLevel >= 5 ? "Medium" : "Low",
+      capacity: Math.floor(Math.random() * 40) + 50,
+      description: ngo.serviceDescription,
+      phone: ngo.phone,
+      coordinates: { 
+        // Mock map coordinates between 20-80%
+        x: 20 + Math.floor(Math.random() * 60), 
+        y: 20 + Math.floor(Math.random() * 60) 
+      }
+    };
+  };
+
+  // Form → Results (Calls /api/match-ngo)
+  const handleFormSubmit = async (data) => {
     setFormData(data);
-    const matches = computeMatches(data, ngoData);
-    setMatchedNgos(matches);
-    navigateTo(VIEWS.RESULTS, 1);
+    const loadingToast = toast.loading('Finding the best NGO matches...', {
+      description: 'Running multi-weighted scoring algorithm.'
+    });
+
+    try {
+      const loc = await getLocation();
+      const payload = {
+        description: aiData?.description || `${data.quantity} ${data.foodState} food`,
+        category: data.foodState === 'cooked' ? 'perishable' : 'dry',
+        lat: loc.lat,
+        lng: loc.lng
+      };
+
+      const response = await fetch('http://localhost:3001/api/match-ngo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error('Failed to find matches');
+
+      const result = await response.json();
+      
+      const formattedMatches = result.matches.map(mapBackendNgoToFrontend);
+      setMatchedNgos(formattedMatches);
+      
+      toast.dismiss(loadingToast);
+      toast.success('Found great matches!', { icon: '🎉' });
+      navigateTo(VIEWS.RESULTS, 1);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error('Matching failed', {
+        description: error.message || 'Could not find NGOs.'
+      });
+    }
   };
 
   // Any → Upload (reset)
   const handleReset = () => {
     setImagePreview(null);
     setFormData(null);
+    setAiData(null);
     setMatchedNgos([]);
     navigateTo(VIEWS.UPLOAD, -1);
   };
@@ -161,6 +295,7 @@ export default function App() {
             >
               <FormView
                 imagePreview={imagePreview}
+                initialData={aiData}
                 onBack={handleBack}
                 onSubmit={handleFormSubmit}
               />

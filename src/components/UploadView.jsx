@@ -6,9 +6,11 @@ export default function UploadView({ onUpload }) {
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState(null);
   const [fileName, setFileName] = useState('');
+  const [rawFile, setRawFile] = useState(null);
 
   const handleFile = useCallback((file) => {
     if (!file || !file.type.startsWith('image/')) return;
+    setRawFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       setPreview(e.target.result);
@@ -160,7 +162,7 @@ export default function UploadView({ onUpload }) {
           id="upload-continue-btn"
           className={`btn-primary w-full mt-5 py-4 rounded-2xl text-base flex items-center justify-center gap-2.5 ${!preview ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={!preview}
-          onClick={() => preview && onUpload(preview)}
+          onClick={() => preview && onUpload({ preview, file: rawFile })}
           whileHover={preview ? { scale: 1.02 } : {}}
           whileTap={preview ? { scale: 0.98 } : {}}
           initial={{ opacity: 0, y: 16 }}
