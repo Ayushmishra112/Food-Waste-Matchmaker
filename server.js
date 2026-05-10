@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import dotenv from 'dotenv';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -17,9 +17,10 @@ app.use(express.json());
 // Configure multer to store files in memory
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Initialize Gemini API
-// Use VITE_GEMINI_API_KEY as it's defined in the .env file created earlier
-const genAI = new GoogleGenerativeAI(process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY);
+// Initialize Groq API
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 app.post('/api/analyze-food', upload.single('image'), async (req, res) => {
   try {
@@ -27,54 +28,66 @@ app.post('/api/analyze-food', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'No image file provided' });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // Convert image buffer to base64 data URL
+    const base64Image = req.file.buffer.toString('base64');
+    const dataUrl = `data:${req.file.mimetype};base64,${base64Image}`;
 
-    // Prepare the image part for Gemini
-    const imagePart = {
-      inlineData: {
-        data: req.file.buffer.toString('base64'),
-        mimeType: req.file.mimetype
-      }
-    };
+    // Use Llama 3.2 Vision model on Groq
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `Analyze this image of food. Please return a response strictly in valid JSON format.
+              The JSON should have exactly the following structure and data types:
+              {
+                "description": "string (A short description of the food)",
+                "quantity": integer (Number of items or estimated servings, just the number),
+                "unit": "string (The unit for the quantity, e.g., 'servings', 'burgers', 'kgs')",
+                "dietType": "string ('veg' or 'non-veg')",
+                "type": "string ('raw' or 'cooked')"
+              }`
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: dataUrl,
+              },
+            },
+          ],
+        },
+      ],
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      temperature: 0.1,
+      response_format: { type: 'json_object' } // Groq supports forced JSON mode
+    });
 
-    // The prompt specifying what we want in JSON format
-    const prompt = `Analyze this image of food. Please return a response strictly in valid JSON format without any markdown wrappers (like \`\`\`json).
-    The JSON should have exactly the following structure:
-    {
-      "description": "A short description of what the food seems to be",
-      "quantity": "An estimate of how much food is there (e.g., 'about 3 servings', '1 large bowl', '50 meals')",
-      "dietType": "veg" or "non-veg" based on visual evidence
-    }`;
+    const text = completion.choices[0].message.content;
 
-    // Call the model
-    const result = await model.generateContent([prompt, imagePart]);
-    const response = await result.response;
-    const text = response.text();
-
-    // Try to parse the JSON response
-    let jsonResponse;
+    // Return the parsed JSON response
     try {
-      // Remove potential markdown code block formatting if Gemini includes it despite the prompt
-      const cleanedText = text.replace(/```json\n?|```\n?/g, '').trim();
-      jsonResponse = JSON.parse(cleanedText);
+      res.json(JSON.parse(text));
     } catch (parseError) {
-      console.error('Failed to parse Gemini response as JSON:', text);
-      return res.status(500).json({ 
-        error: 'AI response was not in expected JSON format',
-        rawResponse: text
-      });
+      console.error('Failed to parse Groq response:', text);
+      res.status(500).json({ error: 'AI response was not in expected JSON format', raw: text });
     }
 
-    // Return the JSON response to the client
-    res.json(jsonResponse);
-
   } catch (error) {
-    console.error('Error analyzing image:', error);
-    res.status(500).json({ error: 'An error occurred while analyzing the image' });
+    console.error('--- GROQ API ERROR ---');
+    console.error('Message:', error.message);
+    console.error('------------------------');
+    
+    res.status(500).json({ 
+      error: 'An error occurred while analyzing the image with Groq',
+      details: error.message 
+    });
   }
 });
 
 app.listen(port, () => {
   console.log(`Food Waste Matchmaker API is running on http://localhost:${port}`);
-  console.log(`Endpoint ready: POST http://localhost:${port}/api/analyze-food (expects 'image' in form-data)`);
+  console.log(`Using Groq for processing...`);
+  console.log(`Endpoint ready: POST http://localhost:${port}/api/analyze-food`);
 });
