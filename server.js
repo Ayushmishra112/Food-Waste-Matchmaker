@@ -59,7 +59,7 @@ app.post('/api/analyze-food', upload.single('image'), async (req, res) => {
           ],
         },
       ],
-      model: 'llama-3.2-11b-vision-instruct',
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
       temperature: 0.1,
       response_format: { type: 'json_object' } // Groq supports forced JSON mode
     });
