@@ -12,14 +12,15 @@ function CircularProgress({ score, size = 72, strokeWidth = 6 }) {
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
 
-  const color = score >= 85 ? '#059669' : score >= 70 ? '#d97706' : '#6366f1';
+  // Apple System Colors
+  const color = score >= 85 ? '#34c759' : score >= 70 ? '#ff9500' : '#0071e3';
 
   return (
     <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <circle
           cx={size / 2} cy={size / 2} r={radius}
-          stroke="#e5e7eb" strokeWidth={strokeWidth} fill="none"
+          stroke="#f2f2f7" strokeWidth={strokeWidth} fill="none"
         />
         <motion.circle
           cx={size / 2} cy={size / 2} r={radius}
@@ -32,8 +33,8 @@ function CircularProgress({ score, size = 72, strokeWidth = 6 }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-lg font-bold" style={{ color }}>{score}</span>
-        <span className="text-xs text-slate-400 leading-none">match</span>
+        <span className="text-lg font-bold" style={{ color: '#1d1d1f' }}>{score}</span>
+        <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider leading-none mt-0.5">Match</span>
       </div>
     </div>
   );
@@ -41,16 +42,16 @@ function CircularProgress({ score, size = 72, strokeWidth = 6 }) {
 
 // ── Tag Pill ───────────────────────────────────────────────────────────────
 const tagStyleMap = {
-  orange: 'bg-orange-50 text-orange-700 border-orange-200',
-  blue: 'bg-blue-50 text-blue-700 border-blue-200',
-  green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  purple: 'bg-purple-50 text-purple-700 border-purple-200',
+  orange: 'bg-[#fff8f2] text-[#ff9500] border-[#ffe4c4]',
+  blue: 'bg-[#f2f8ff] text-[#0071e3] border-[#d6eaff]',
+  green: 'bg-[#f2fcf5] text-[#34c759] border-[#d3f5df]',
+  indigo: 'bg-[#f7f5ff] text-[#5856d6] border-[#e0ddff]',
+  purple: 'bg-[#faf5ff] text-[#af52de] border-[#ecd9ff]',
 };
 
 function Tag({ label, color = 'green' }) {
   return (
-    <span className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full border ${tagStyleMap[color] || tagStyleMap.green}`}>
+    <span className={`inline-flex items-center text-[11px] font-medium px-2.5 py-1 rounded-full border ${tagStyleMap[color] || tagStyleMap.green}`}>
       {label}
     </span>
   );
@@ -61,15 +62,12 @@ function MockMap({ ngos, topNgo }) {
   const pathRef = useRef(null);
 
   return (
-    <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-gradient-to-br from-slate-100 to-emerald-50 border border-slate-200">
-      {/* Grid lines */}
-      <svg className="absolute inset-0 w-full h-full opacity-20">
-        {[20, 40, 60, 80].map((y) => (
-          <line key={`h${y}`} x1="0%" y1={`${y}%`} x2="100%" y2={`${y}%`} stroke="#94a3b8" strokeWidth="1" />
-        ))}
-        {[20, 40, 60, 80].map((x) => (
-          <line key={`v${x}`} x1={`${x}%`} y1="0" x2={`${x}%`} y2="100%" stroke="#94a3b8" strokeWidth="1" />
-        ))}
+    <div className="relative w-full h-56 rounded-2xl overflow-hidden border border-slate-200" style={{ background: '#f0ede6' }}>
+      {/* Abstract roads / map texture (Apple Maps style) */}
+      <svg className="absolute inset-0 w-full h-full opacity-40">
+        <path d="M -10 50 Q 30 60 40 120 T 150 200" stroke="#ffffff" strokeWidth="12" fill="none" strokeLinecap="round" />
+        <path d="M 80 -10 Q 100 80 200 90 T 400 150" stroke="#ffffff" strokeWidth="8" fill="none" strokeLinecap="round" />
+        <path d="M 200 250 Q 250 150 350 120 T 500 80" stroke="#ffffff" strokeWidth="14" fill="none" strokeLinecap="round" />
       </svg>
 
       {/* Route line */}
@@ -77,36 +75,30 @@ function MockMap({ ngos, topNgo }) {
         {topNgo && (
           <motion.path
             d={`M 15% 80% Q 30% 20% ${topNgo.coordinates.x}% ${topNgo.coordinates.y}%`}
-            stroke="url(#routeGrad)"
-            strokeWidth="2.5"
+            stroke="#0071e3"
+            strokeWidth="3.5"
             fill="none"
-            strokeDasharray="6 3"
+            strokeDasharray="6 4"
             strokeLinecap="round"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
             transition={{ duration: 1.5, delay: 0.6, ease: 'easeInOut' }}
           />
         )}
-        <defs>
-          <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#059669" />
-            <stop offset="100%" stopColor="#0d9488" />
-          </linearGradient>
-        </defs>
       </svg>
 
-      {/* Your location pin */}
+      {/* Your location pin (Apple style blue dot) */}
       <motion.div
         className="absolute flex flex-col items-center"
-        style={{ left: '15%', bottom: '20%', transform: 'translateX(-50%)' }}
+        style={{ left: '15%', bottom: '20%', transform: 'translate(-50%, 50%)' }}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.2, type: 'spring' }}
       >
-        <div className="w-8 h-8 rounded-full bg-blue-600 border-3 border-white shadow-lg flex items-center justify-center">
-          <span className="text-xs">📍</span>
+        <div className="relative flex items-center justify-center w-8 h-8">
+          <div className="absolute w-full h-full bg-blue-400 rounded-full opacity-40 animate-ping" />
+          <div className="w-4 h-4 bg-[#0071e3] border-2 border-white rounded-full shadow-sm z-10" />
         </div>
-        <span className="text-xs font-semibold text-blue-700 mt-1 bg-white/80 px-1.5 py-0.5 rounded-full shadow-sm">You</span>
       </motion.div>
 
       {/* NGO pins */}
@@ -117,19 +109,18 @@ function MockMap({ ngos, topNgo }) {
           style={{
             left: `${ngo.coordinates.x}%`,
             top: `${ngo.coordinates.y}%`,
-            transform: 'translate(-50%, -50%)'
+            transform: 'translate(-50%, -100%)'
           }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.4 + i * 0.12, type: 'spring' }}
+          initial={{ scale: 0, opacity: 0, y: 10 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 + i * 0.12, type: 'spring', stiffness: 200, damping: 15 }}
         >
-          <div
-            className={`w-7 h-7 rounded-full border-2 border-white shadow-md flex items-center justify-center text-xs ${i === 0 ? 'bg-emerald-500' : 'bg-slate-500'}`}
-          >
-            {i === 0 ? '⭐' : '📌'}
+          {/* Apple style map marker */}
+          <div className={`relative flex items-center justify-center w-7 h-7 rounded-full shadow-md text-white border-2 border-white ${i === 0 ? 'bg-[#ff3b30]' : 'bg-[#8e8e93]'}`}>
+            {i === 0 ? <Star size={12} fill="white" /> : <span className="text-[10px] font-bold">{i + 1}</span>}
           </div>
           {i === 0 && (
-            <span className="text-xs font-bold text-emerald-700 mt-1 bg-white/90 px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap max-w-[80px] truncate">
+            <span className="text-[11px] font-bold text-slate-800 mt-1 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap max-w-[100px] truncate border border-slate-100">
               {ngo.name.split(' ')[0]}
             </span>
           )}
@@ -137,8 +128,8 @@ function MockMap({ ngos, topNgo }) {
       ))}
 
       {/* Map label */}
-      <div className="absolute bottom-2 right-3 text-xs text-slate-400 bg-white/70 backdrop-blur-sm px-2 py-1 rounded-lg">
-        Simulated Route Map
+      <div className="absolute bottom-3 right-3 text-[10px] font-medium tracking-wide text-slate-500 uppercase bg-white/80 backdrop-blur-md px-2 py-1 rounded-md shadow-sm border border-slate-100/50">
+        Suggested Route
       </div>
     </div>
   );
@@ -150,16 +141,16 @@ function NgoCard({ ngo, rank, delay }) {
 
   return (
     <motion.div
-      className={`glass-card rounded-2xl p-5 ${rank === 0 ? 'ring-2 ring-emerald-400 ring-offset-2' : ''}`}
+      className={`glass-card rounded-2xl p-5 ${rank === 0 ? 'ring-[1.5px] ring-[#0071e3]' : ''}`}
       initial={{ opacity: 0, x: -24 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay, duration: 0.4, ease: 'easeOut' }}
-      whileHover={{ y: -2, boxShadow: '0 8px 32px rgba(5,150,105,0.12)' }}
+      whileHover={{ y: -2, boxShadow: '0 12px 32px rgba(0,0,0,0.08)' }}
     >
       {rank === 0 && (
         <div className="flex items-center gap-1.5 mb-3">
-          <Trophy size={14} className="text-amber-500" />
-          <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Best Match</span>
+          <Trophy size={14} className="text-[#0071e3]" />
+          <span className="text-xs font-bold text-[#0071e3] uppercase tracking-wider">Top Recommended Match</span>
         </div>
       )}
 
@@ -302,8 +293,8 @@ function LoadingState() {
             />
             <defs>
               <linearGradient id="loadGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#059669" />
-                <stop offset="100%" stopColor="#0d9488" />
+                <stop offset="0%" stopColor="#0071e3" />
+                <stop offset="100%" stopColor="#4ea8de" />
               </linearGradient>
             </defs>
           </svg>
@@ -326,7 +317,7 @@ function LoadingState() {
         {/* Progress bar */}
         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"
+            className="h-full rounded-full bg-gradient-to-r from-[#0071e3] to-[#4ea8de]"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.5 }}
           />

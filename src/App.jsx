@@ -244,7 +244,7 @@ export default function App() {
                     active
                       ? 'text-white shadow-sm'
                       : done
-                      ? 'text-emerald-700 bg-emerald-50 border border-emerald-200'
+                      ? 'text-[#0071e3] bg-[#f2f8ff] border border-[#d6eaff]'
                       : 'text-slate-400 bg-slate-50 border border-slate-200'
                   }`}
                   style={active ? { background: 'var(--brand-gradient)' } : {}}

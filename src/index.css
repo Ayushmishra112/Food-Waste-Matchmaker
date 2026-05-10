@@ -37,64 +37,40 @@
 }
 
 /* ─────────────────────────────────────────────
-   CSS Custom Properties (Shadcn-inspired)
+   CSS Custom Properties (Apple-inspired Premium UI)
 ───────────────────────────────────────────── */
 :root {
-  /* Primary brand */
-  --brand-emerald: #059669;
-  --brand-teal: #0d9488;
-  --brand-gradient: linear-gradient(to right, #059669, #0d9488);
+  /* Primary brand - Minimalist blue or subtle dark */
+  --brand-primary: #0071e3;
+  --brand-gradient: linear-gradient(135deg, #0071e3, #4ea8de);
 
   /* Backgrounds */
-  --bg-app: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, rgba(236, 253, 245, 0.4) 100%);
-  --bg-glass: rgba(255, 255, 255, 0.75);
-  --bg-glass-strong: rgba(255, 255, 255, 0.9);
-  --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-app: #fbfbfd;
+  --bg-glass: rgba(255, 255, 255, 0.72);
+  --bg-glass-strong: rgba(255, 255, 255, 0.95);
+  --bg-card: rgba(255, 255, 255, 0.85);
 
   /* Borders */
-  --border-subtle: rgba(229, 231, 235, 0.8);
+  --border-subtle: rgba(0, 0, 0, 0.08);
   --border-glass: rgba(255, 255, 255, 0.6);
-  --border-brand: rgba(5, 150, 105, 0.3);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.05);
-  --shadow-emerald: 0 8px 32px rgba(5, 150, 105, 0.18);
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+  /* Shadows (Apple style: very soft, diffuse) */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 10px 40px rgba(0, 0, 0, 0.03), 0 2px 10px rgba(0, 0, 0, 0.02);
 
   /* Radius */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1.25rem;
-  --radius-xl: 1.75rem;
-  --radius-2xl: 2.5rem;
-
-  /* Typography */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem;
-  --text-4xl: 2.25rem;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
 }
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-app: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c1a12 100%);
-    --bg-glass: rgba(15, 23, 42, 0.75);
-    --bg-glass-strong: rgba(15, 23, 42, 0.9);
-    --bg-card: rgba(30, 41, 59, 0.8);
-    --border-subtle: rgba(51, 65, 85, 0.8);
-    --border-glass: rgba(51, 65, 85, 0.6);
-  }
-
-  body {
-    background: var(--bg-app);
-  }
+body {
+  background: var(--bg-app);
+  color: #1d1d1f;
 }
 
 /* ─────────────────────────────────────────────
@@ -102,9 +78,9 @@
 ───────────────────────────────────────────── */
 .glass-card {
   background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-card);
 }
 
@@ -116,20 +92,21 @@
 }
 
 .btn-primary {
-  background: var(--brand-gradient);
+  background: #1d1d1f;
   color: white;
   border: none;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
   letter-spacing: -0.01em;
-  box-shadow: var(--shadow-emerald);
-  transition: box-shadow 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
 }
 
 .btn-primary:hover {
-  box-shadow: 0 12px 40px rgba(5, 150, 105, 0.28);
-  opacity: 0.92;
+  background: #333336;
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
 /* Custom range slider */

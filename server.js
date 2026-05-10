@@ -59,7 +59,7 @@ app.post('/api/analyze-food', upload.single('image'), async (req, res) => {
           ],
         },
       ],
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      model: 'llama-3.2-90b-vision-preview',
       temperature: 0.1,
       response_format: { type: 'json_object' } // Groq supports forced JSON mode
     });
@@ -83,8 +83,12 @@ app.post('/api/analyze-food', upload.single('image'), async (req, res) => {
         const currentHour = new Date().getHours();
         const isLateNight = currentHour >= 20 || currentHour < 6;
 
-        const matches = NGOs.map(ngo => {
-          const distance = haversine(lat, lng, ngo.lat, ngo.lng);
+        const matches = NGOs.map((ngo, index) => {
+          // DEMO MAGIC: Place NGOs dynamically around the user's location!
+          const demoLat = lat + (Math.random() - 0.5) * 0.08;
+          const demoLng = lng + (Math.random() - 0.5) * 0.08;
+          const distance = haversine(lat, lng, demoLat, demoLng);
+          
           let score = 100;
           let reasoning = '';
 
@@ -93,35 +97,40 @@ app.post('/api/analyze-food', upload.single('image'), async (req, res) => {
             reasoning = 'Prioritized for immediate proximity to prevent spoilage.';
             
             if (isLateNight && ngo.open24h) {
-              score += 50;
+              score += 20;
               reasoning += ' Selected due to 24/7 availability for late-night donation.';
             } else if (isLateNight && !ngo.open24h) {
-              score -= 40;
+              score -= 30;
               reasoning += ' Discouraged as NGO might be closed.';
             }
 
             if (ngo.type === 'perishable' || ngo.type === 'any') {
-              score += 20;
+              score += 10;
             } else {
-              score -= 50;
+              score -= 40;
               reasoning = 'Low compatibility: NGO usually handles dry goods.';
             }
           } else {
             score -= distance * 2;
-            score += ngo.needLevel * 10;
+            score += ngo.needLevel * 5;
             reasoning = `Selected for high community impact (Need Level: ${ngo.needLevel}). Distance is secondary for stable goods.`;
 
             if (ngo.type === 'dry' || ngo.type === 'any') {
-              score += 20;
+              score += 10;
             }
           }
 
+          // Clamp score between 0 and 100
+          score = Math.max(0, Math.min(100, Math.round(score)));
+
           return {
             ...ngo,
+            lat: demoLat,
+            lng: demoLng,
             distance: distance.toFixed(2),
             score,
             reasoning,
-            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${ngo.lat},${ngo.lng}`
+            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${demoLat},${demoLng}`
           };
         });
 
@@ -256,8 +265,12 @@ app.post('/api/match-ngo', (req, res) => {
   const currentHour = new Date().getHours();
   const isLateNight = currentHour >= 20 || currentHour < 6;
 
-  const matches = NGOs.map(ngo => {
-    const distance = haversine(lat, lng, ngo.lat, ngo.lng);
+  const matches = NGOs.map((ngo, index) => {
+    // DEMO MAGIC: Place NGOs dynamically around the user's location!
+    const demoLat = lat + (Math.random() - 0.5) * 0.08;
+    const demoLng = lng + (Math.random() - 0.5) * 0.08;
+    const distance = haversine(lat, lng, demoLat, demoLng);
+    
     let score = 100;
     let reasoning = '';
 
@@ -266,35 +279,40 @@ app.post('/api/match-ngo', (req, res) => {
       reasoning = 'Prioritized for immediate proximity to prevent spoilage.';
       
       if (isLateNight && ngo.open24h) {
-        score += 50;
+        score += 20;
         reasoning += ' Selected due to 24/7 availability for late-night donation.';
       } else if (isLateNight && !ngo.open24h) {
-        score -= 40;
+        score -= 30;
         reasoning += ' Discouraged as NGO might be closed.';
       }
 
       if (ngo.type === 'perishable' || ngo.type === 'any') {
-        score += 20;
+        score += 10;
       } else {
-        score -= 50;
+        score -= 40;
         reasoning = 'Low compatibility: NGO usually handles dry goods.';
       }
     } else {
       score -= distance * 2;
-      score += ngo.needLevel * 10;
+      score += ngo.needLevel * 5;
       reasoning = `Selected for high community impact (Need Level: ${ngo.needLevel}). Distance is secondary for stable goods.`;
 
       if (ngo.type === 'dry' || ngo.type === 'any') {
-        score += 20;
+        score += 10;
       }
     }
 
+    // Clamp score between 0 and 100
+    score = Math.max(0, Math.min(100, Math.round(score)));
+
     return {
       ...ngo,
+      lat: demoLat,
+      lng: demoLng,
       distance: distance.toFixed(2),
       score,
       reasoning,
-      googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${ngo.lat},${ngo.lng}`
+      googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${demoLat},${demoLng}`
     };
   });
 
