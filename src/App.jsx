@@ -45,10 +45,10 @@ export default function App() {
             setLocation(loc);
             resolve(loc);
           },
-          () => resolve({ lat: 19.0760, lng: 72.8777 }) // fallback to Mumbai
+          () => resolve({ lat: 28.4595, lng: 77.0266 }) // fallback to Gurugram
         );
       } else {
-        resolve({ lat: 19.0760, lng: 72.8777 });
+        resolve({ lat: 28.4595, lng: 77.0266 });
       }
     });
   };
@@ -93,9 +93,8 @@ export default function App() {
 
       // We could use the matches directly, but let's just go to form for verification
       toast.dismiss(loadingToast);
-      toast.success('Analysis complete!', {
-        description: 'Review the details before confirming.',
-        icon: '✅',
+      toast.success('Analysis complete', {
+        description: 'Review the details before confirming.'
       });
       
       navigateTo(VIEWS.FORM, 1);
@@ -172,7 +171,7 @@ export default function App() {
       setMatchedNgos(formattedMatches);
       
       toast.dismiss(loadingToast);
-      toast.success('Found great matches!', { icon: '🎉' });
+      toast.success('Matches found');
       navigateTo(VIEWS.RESULTS, 1);
     } catch (error) {
       toast.dismiss(loadingToast);

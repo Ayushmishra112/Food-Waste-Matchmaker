@@ -4,20 +4,20 @@ import { useForm } from 'react-hook-form';
 import { ArrowLeft, ArrowRight, Thermometer, Package, Leaf, Drumstick, ChefHat, Sprout, Clock, Info, Sparkles } from 'lucide-react';
 
 const FOOD_TYPES = [
-  { id: 'veg', label: 'Vegetarian', icon: Leaf, color: 'emerald', emoji: '🥗' },
-  { id: 'non-veg', label: 'Non-Vegetarian', icon: Drumstick, color: 'orange', emoji: '🍗' },
+  { id: 'veg', label: 'Vegetarian', icon: Leaf, color: 'emerald' },
+  { id: 'non-veg', label: 'Non-Vegetarian', icon: Drumstick, color: 'orange' },
 ];
 
 const FOOD_STATES = [
-  { id: 'cooked', label: 'Cooked / Prepared', icon: ChefHat, desc: 'Ready-to-eat meals', emoji: '🍛' },
-  { id: 'raw', label: 'Raw / Uncooked', icon: Sprout, desc: 'Uncooked ingredients', emoji: '🥦' },
+  { id: 'cooked', label: 'Cooked / Prepared', icon: ChefHat, desc: 'Ready-to-eat meals' },
+  { id: 'raw', label: 'Raw / Uncooked', icon: Sprout, desc: 'Uncooked ingredients' },
 ];
 
 const QUANTITY_OPTIONS = [
-  { id: 'small', label: 'Small', desc: '1–5 servings', emoji: '🥡' },
-  { id: 'medium', label: 'Medium', desc: '6–20 servings', emoji: '🍱' },
-  { id: 'large', label: 'Large', desc: '21–50 servings', emoji: '🥘' },
-  { id: 'bulk', label: 'Bulk', desc: '50+ servings', emoji: '🏭' },
+  { id: 'small', label: 'Small', desc: '1–5 servings', icon: Package },
+  { id: 'medium', label: 'Medium', desc: '6–20 servings', icon: Package },
+  { id: 'large', label: 'Large', desc: '21–50 servings', icon: Package },
+  { id: 'bulk', label: 'Bulk', desc: '50+ servings', icon: Package },
 ];
 
 function OptionCard({ selected, onClick, children, id }) {
@@ -26,17 +26,17 @@ function OptionCard({ selected, onClick, children, id }) {
       id={id}
       type="button"
       onClick={onClick}
-      className={`relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 text-left ${
+      className={`relative flex flex-col items-center gap-3 p-5 rounded-2xl border cursor-pointer transition-all duration-200 text-left ${
         selected
-          ? 'border-emerald-500 bg-emerald-50 shadow-md shadow-emerald-100'
-          : 'border-slate-200 bg-white/70 hover:border-emerald-300 hover:bg-emerald-50/30'
+          ? 'border-[#0071e3] bg-[#f2f8ff] shadow-sm'
+          : 'border-slate-200 bg-white/70 hover:border-slate-300 hover:bg-slate-50/50'
       }`}
       whileHover={{ scale: 1.02, y: -1 }}
       whileTap={{ scale: 0.97 }}
     >
       {selected && (
         <motion.div
-          className="absolute top-2 right-2 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center"
+          className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#0071e3] flex items-center justify-center"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 400 }}
@@ -87,7 +87,7 @@ export default function FormView({ imagePreview, initialData, onBack, onSubmit }
             {/* Image thumb */}
             {imagePreview && (
               <motion.div
-                className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-emerald-200 shadow-md flex-shrink-0"
+                className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-200 shadow-sm flex-shrink-0"
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
               >
@@ -97,7 +97,7 @@ export default function FormView({ imagePreview, initialData, onBack, onSubmit }
             <div>
               <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Tell us about<br /><span className="gradient-text">your food</span></h1>
               {initialData?.description ? (
-                <p className="text-emerald-600 text-sm mt-2 font-medium bg-emerald-50 px-3 py-1.5 rounded-lg inline-block border border-emerald-100">
+                <p className="text-[#0071e3] text-sm mt-2 font-medium bg-[#f2f8ff] px-3 py-1.5 rounded-lg inline-block border border-[#d6eaff]">
                   <Sparkles size={14} className="inline mr-1.5 -mt-0.5" />
                   AI saw: "{initialData.description}"
                 </p>
@@ -127,8 +127,10 @@ export default function FormView({ imagePreview, initialData, onBack, onSubmit }
                   selected={foodType === type.id}
                   onClick={() => setFoodType(type.id)}
                 >
-                  <span className="text-3xl">{type.emoji}</span>
-                  <span className={`text-sm font-semibold ${foodType === type.id ? 'text-emerald-700' : 'text-slate-700'}`}>
+                  <div className={`p-2 rounded-full ${foodType === type.id ? 'bg-[#0071e3]/10 text-[#0071e3]' : 'bg-slate-100 text-slate-500'}`}>
+                    <type.icon size={24} />
+                  </div>
+                  <span className={`text-sm font-semibold ${foodType === type.id ? 'text-[#0071e3]' : 'text-slate-700'}`}>
                     {type.label}
                   </span>
                 </OptionCard>
@@ -147,9 +149,11 @@ export default function FormView({ imagePreview, initialData, onBack, onSubmit }
                   selected={foodState === state.id}
                   onClick={() => setFoodState(state.id)}
                 >
-                  <span className="text-3xl">{state.emoji}</span>
+                  <div className={`p-2 rounded-full ${foodState === state.id ? 'bg-[#0071e3]/10 text-[#0071e3]' : 'bg-slate-100 text-slate-500'}`}>
+                    <state.icon size={24} />
+                  </div>
                   <div className="text-center">
-                    <p className={`text-sm font-semibold ${foodState === state.id ? 'text-emerald-700' : 'text-slate-700'}`}>
+                    <p className={`text-sm font-semibold ${foodState === state.id ? 'text-[#0071e3]' : 'text-slate-700'}`}>
                       {state.label}
                     </p>
                     <p className="text-xs text-slate-400 mt-0.5">{state.desc}</p>
@@ -170,15 +174,15 @@ export default function FormView({ imagePreview, initialData, onBack, onSubmit }
                 transition={{ duration: 0.35, ease: 'easeInOut' }}
                 style={{ overflow: 'hidden' }}
               >
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                <div className="bg-[#f2f8ff] border border-[#d6eaff] rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Clock size={16} className="text-amber-600" />
-                      <h2 className="text-sm font-semibold text-amber-700">Hours Since Cooked</h2>
+                      <Clock size={16} className="text-[#0071e3]" />
+                      <h2 className="text-sm font-semibold text-[#0071e3]">Hours Since Cooked</h2>
                     </div>
                     <motion.span
                       key={hoursSinceCooked}
-                      className="text-2xl font-bold text-amber-700"
+                      className="text-2xl font-bold text-[#0071e3]"
                       initial={{ scale: 0.8 }}
                       animate={{ scale: 1 }}
                     >
@@ -195,17 +199,17 @@ export default function FormView({ imagePreview, initialData, onBack, onSubmit }
                     onChange={(e) => setHoursSinceCooked(Number(e.target.value))}
                     className="w-full"
                     style={{
-                      background: `linear-gradient(to right, #d97706 0%, #d97706 ${(hoursSinceCooked / 12) * 100}%, #fde68a ${(hoursSinceCooked / 12) * 100}%, #fde68a 100%)`,
+                      background: `linear-gradient(to right, #0071e3 0%, #0071e3 ${(hoursSinceCooked / 12) * 100}%, #d6eaff ${(hoursSinceCooked / 12) * 100}%, #d6eaff 100%)`,
                     }}
                   />
-                  <div className="flex justify-between text-xs text-amber-500 mt-1.5">
+                  <div className="flex justify-between text-xs text-[#4ea8de] mt-1.5 font-medium">
                     <span>Just cooked</span>
                     <span>12+ hours</span>
                   </div>
                   {hoursSinceCooked >= 6 && (
-                    <div className="flex items-start gap-2 mt-3 bg-orange-50 border border-orange-200 rounded-xl p-2.5">
-                      <Info size={14} className="text-orange-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-orange-600">Food cooked {hoursSinceCooked}h ago — we'll prioritize NGOs with cold storage and fast pickup.</p>
+                    <div className="flex items-start gap-2 mt-3 bg-white border border-slate-200 rounded-xl p-2.5 shadow-sm">
+                      <Info size={14} className="text-slate-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-slate-600">Food cooked {hoursSinceCooked}h ago — we'll prioritize NGOs with cold storage and fast pickup.</p>
                     </div>
                   )}
                 </div>
@@ -224,10 +228,12 @@ export default function FormView({ imagePreview, initialData, onBack, onSubmit }
                   selected={quantity === q.id}
                   onClick={() => setQuantity(q.id)}
                 >
-                  <span className="text-2xl">{q.emoji}</span>
+                  <div className={`p-2 rounded-full ${quantity === q.id ? 'bg-[#0071e3]/10 text-[#0071e3]' : 'bg-slate-100 text-slate-500'}`}>
+                    <q.icon size={20} />
+                  </div>
                   <div className="text-center">
-                    <p className={`text-xs font-bold ${quantity === q.id ? 'text-emerald-700' : 'text-slate-700'}`}>{q.label}</p>
-                    <p className="text-xs text-slate-400">{q.desc}</p>
+                    <p className={`text-xs font-bold ${quantity === q.id ? 'text-[#0071e3]' : 'text-slate-700'}`}>{q.label}</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">{q.desc}</p>
                   </div>
                 </OptionCard>
               ))}

@@ -298,7 +298,9 @@ function LoadingState() {
               </linearGradient>
             </defs>
           </svg>
-          <div className="absolute inset-0 flex items-center justify-center text-2xl">🤖</div>
+          <div className="absolute inset-0 flex items-center justify-center text-[#0071e3]">
+            <Zap size={28} />
+          </div>
         </div>
 
         <h2 className="text-xl font-bold text-slate-800 mb-2">AI Analysis</h2>
@@ -373,10 +375,10 @@ export default function ResultsView({ matchedNgos, formData, onReset }) {
           {/* Summary pills */}
           <div className="flex flex-wrap gap-2 mt-3">
             {[
-              { label: `🥗 ${formData.foodType === 'veg' ? 'Vegetarian' : 'Non-Veg'}` },
-              { label: `${formData.foodState === 'cooked' ? '🍛 Cooked' : '🥦 Raw'}` },
-              { label: `📦 ${formData.quantity.charAt(0).toUpperCase() + formData.quantity.slice(1)} quantity` },
-              ...(formData.foodState === 'cooked' ? [{ label: `⏱ ${formData.hoursSinceCooked}h ago` }] : []),
+              { label: formData.foodType === 'veg' ? 'Vegetarian' : 'Non-Veg' },
+              { label: formData.foodState === 'cooked' ? 'Cooked' : 'Raw' },
+              { label: `${formData.quantity.charAt(0).toUpperCase() + formData.quantity.slice(1)} quantity` },
+              ...(formData.foodState === 'cooked' ? [{ label: `${formData.hoursSinceCooked}h ago` }] : []),
             ].map(({ label }) => (
               <span key={label} className="text-xs bg-white border border-slate-200 rounded-full px-3 py-1 text-slate-600 shadow-sm">
                 {label}
