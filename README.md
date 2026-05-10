@@ -1,59 +1,67 @@
-# Food Waste Matchmaker (AI Decision Engine Demo)
+# Food Waste Matchmaker: AI-Powered Redistribution Engine
 
-This is an AI-powered food redistribution optimization engine designed for the hackathon demo. It intelligently matches restaurant leftover food with nearby NGOs/shelters by prioritizing urgency, quantity, distance, and fairness.
+A premium, AI-driven platform designed to minimize food waste by intelligently matching surplus food with the most compatible local NGOs in Gurugram. Built with a focus on "Quiet Luxury" aesthetics and sophisticated AI decision-making.
 
-## 🚀 Features
+## 🚀 Key Features
 
-- **Restaurant Input**: Capture details about leftover food (type, quantity, prep time, expiry, location).
-- **AI Matching Engine**: Uses a proprietary scoring algorithm and Google Gemini API to analyze urgency and recommend the best NGO.
-- **Explainable AI**: The system provides clear reasoning for why a specific NGO was chosen.
-- **Impact Metrics**: Displays simulated real-time impact, such as meals saved, CO₂ waste reduced, and people impacted.
-- **Fairness Optimization**: Automatically avoids overloading saturated NGOs to ensure ethical distribution.
+- **Computer Vision Analysis**: Powered by **Llama 4 (meta-llama/llama-4-scout-17b-16e-instruct)** on Groq, the platform automatically analyzes food photos to identify type, state, and quantity.
+- **Geospatial Optimization**: Real-time Haversine distance calculations ensuring highly perishable cooked food reaches the nearest facility in record time.
+- **Intelligent Scoring Engine**: A complex multi-factor ranking system considering food state, distance, NGO capacity, and community need level.
+- **Premium User Experience**: Minimalist, Apple-inspired interface featuring glassmorphism, smooth animations (Framer Motion), and a custom-styled Route Map.
+- **Automated NGO Matching**: Dynamic simulation of Gurugram-based NGOs (DLF Cyber City, Sector 14, Udyog Vihar) for localized redistribution.
 
 ## 💻 Tech Stack
 
-- **Frontend**: React + Vite, Tailwind CSS
-- **AI Integration**: Google Gemini API (`@google/generative-ai`)
-- **Data**: Local JSON dataset for NGOs and restaurants
+- **Frontend**: React + Vite
+- **Styling**: Vanilla CSS (Custom Design System) + Lucide Icons
+- **Backend**: Node.js + Express
+- **AI Orchestration**: Groq SDK (Llama 4 Vision)
+- **Animations**: Framer Motion
+- **Form Handling**: React Hook Form
 
 ## 📂 Project Structure
 
-```
-src/
- ├── data/
- │    ├── ngos.js              # Mock data for NGOs
- │    └── restaurants.js       # Mock data for restaurants
- │
- ├── components/
- │    ├── FoodForm.jsx         # Input form for food details
- │    ├── MatchCard.jsx        # Displays AI match and reasoning
- │    └── Metrics.jsx          # Route and Rescue impact scores
- │
- ├── App.jsx                   # Main application layout
- │
- └── utils/
-      └── matchEngine.js       # Scoring logic and Gemini explanation generator
+```text
+├── server.js              # Node.js backend with AI & Matching logic
+├── agents.md              # AI Agent definitions & responsibilities
+├── skills.md              # Core AI skills & logic documentation
+├── src/
+│    ├── App.jsx           # Main state & navigation orchestrator
+│    ├── components/
+│    │    ├── UploadView.jsx   # AI Photo capture & analysis
+│    │    ├── FormView.jsx     # Smart form with AI pre-fill
+│    │    └── ResultsView.jsx  # Map-based matching dashboard
+│    └── index.css         # Apple-inspired premium design system
 ```
 
-## 🛠️ Setup & Running Locally
+## 🛠️ Setup & Execution
 
 1. **Install Dependencies**
    ```bash
    npm install
    ```
 
-2. **Configure Environment Variables**
-   Add your Gemini API key to the `.env` file in the root directory:
+2. **Configure AI Access**
+   Create a `.env` file and add your Groq API Key:
    ```env
-   VITE_GEMINI_API_KEY=your_api_key_here
+   GROQ_API_KEY=your_groq_key_here
    ```
 
-3. **Start the Development Server**
+3. **Start Backend Server**
+   ```bash
+   node server.js
+   ```
+
+4. **Start Frontend Application**
    ```bash
    npm run dev
    ```
 
-## 🎯 Demo Flow
-1. **Restaurant Input**: Enter details (e.g., "50 veg meals", expires in 3 hours).
-2. **Optimize Distribution**: Click to trigger the AI decision engine.
-3. **View Results**: The dashboard presents the urgency score, the recommended NGO, the AI reasoning, and overall impact metrics.
+## 🎯 Demo Sequence
+
+1. **Upload**: Drag & drop a food image. The AI Analysis Agent identifies the contents.
+2. **Review**: Verify the AI-suggested metadata in the smart form. Proximity-based matching is triggered.
+3. **Dispatch**: View the suggested route on the map and connect with the top-ranked NGO in Gurugram based on the real-time compatibility score.
+
+---
+*Built with ❤️ for Nagarro - Geek Meetup 3.0*
