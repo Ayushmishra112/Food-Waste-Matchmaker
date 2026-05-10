@@ -32,6 +32,7 @@ export default function App() {
   const navigateTo = (nextView, dir = 1) => {
     setDirection(dir);
     setView(nextView);
+    window.scrollTo(0, 0);
   };
 
   // Helper to get location
