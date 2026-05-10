@@ -59,7 +59,7 @@ app.post('/api/analyze-food', upload.single('image'), async (req, res) => {
           ],
         },
       ],
-      model: 'llama-3.2-90b-vision-preview',
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
       temperature: 0.1,
       response_format: { type: 'json_object' } // Groq supports forced JSON mode
     });
@@ -89,15 +89,15 @@ app.post('/api/analyze-food', upload.single('image'), async (req, res) => {
           const demoLng = lng + (Math.random() - 0.5) * 0.08;
           const distance = haversine(lat, lng, demoLat, demoLng);
           
-          let score = 100;
+          let score = 65; // Realistic base score
           let reasoning = '';
 
           if (isCooked) {
-            score -= distance * 15;
+            score -= distance * 4;
             reasoning = 'Prioritized for immediate proximity to prevent spoilage.';
             
             if (isLateNight && ngo.open24h) {
-              score += 20;
+              score += 15;
               reasoning += ' Selected due to 24/7 availability for late-night donation.';
             } else if (isLateNight && !ngo.open24h) {
               score -= 30;
@@ -105,20 +105,23 @@ app.post('/api/analyze-food', upload.single('image'), async (req, res) => {
             }
 
             if (ngo.type === 'perishable' || ngo.type === 'any') {
-              score += 10;
+              score += 25;
             } else {
               score -= 40;
               reasoning = 'Low compatibility: NGO usually handles dry goods.';
             }
           } else {
-            score -= distance * 2;
-            score += ngo.needLevel * 5;
+            score -= distance * 1.5;
+            score += ngo.needLevel * 3;
             reasoning = `Selected for high community impact (Need Level: ${ngo.needLevel}). Distance is secondary for stable goods.`;
 
             if (ngo.type === 'dry' || ngo.type === 'any') {
-              score += 10;
+              score += 20;
             }
           }
+
+          // Random slight variance for realism
+          score += (Math.random() * 6 - 3);
 
           // Clamp score between 0 and 100
           score = Math.max(0, Math.min(100, Math.round(score)));
@@ -271,15 +274,15 @@ app.post('/api/match-ngo', (req, res) => {
     const demoLng = lng + (Math.random() - 0.5) * 0.08;
     const distance = haversine(lat, lng, demoLat, demoLng);
     
-    let score = 100;
+    let score = 65; // Realistic base score
     let reasoning = '';
 
     if (isCooked) {
-      score -= distance * 15;
+      score -= distance * 4;
       reasoning = 'Prioritized for immediate proximity to prevent spoilage.';
       
       if (isLateNight && ngo.open24h) {
-        score += 20;
+        score += 15;
         reasoning += ' Selected due to 24/7 availability for late-night donation.';
       } else if (isLateNight && !ngo.open24h) {
         score -= 30;
@@ -287,20 +290,23 @@ app.post('/api/match-ngo', (req, res) => {
       }
 
       if (ngo.type === 'perishable' || ngo.type === 'any') {
-        score += 10;
+        score += 25;
       } else {
         score -= 40;
         reasoning = 'Low compatibility: NGO usually handles dry goods.';
       }
     } else {
-      score -= distance * 2;
-      score += ngo.needLevel * 5;
+      score -= distance * 1.5;
+      score += ngo.needLevel * 3;
       reasoning = `Selected for high community impact (Need Level: ${ngo.needLevel}). Distance is secondary for stable goods.`;
 
       if (ngo.type === 'dry' || ngo.type === 'any') {
-        score += 10;
+        score += 20;
       }
     }
+
+    // Random slight variance for realism
+    score += (Math.random() * 6 - 3);
 
     // Clamp score between 0 and 100
     score = Math.max(0, Math.min(100, Math.round(score)));
